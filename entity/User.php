@@ -28,4 +28,18 @@ class User extends Connection {
            
         return $row;      
     }
+    
+public function addUser($data) {
+    $sql = "INSERT INTO users (name, province_id, district_id, role) VALUES (:name, :province_id, :district_id, :role)";
+    
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindParam(':name', $data['name']);
+    $stmt->bindParam(':province_id', $data['province_id']);
+    $stmt->bindParam(':district_id', $data['district_id']);
+    $stmt->bindParam(':role', $data['role']);
+    
+    return $stmt->execute();
+}
+
 }

@@ -179,6 +179,51 @@ $provinces = $province->getAllProvinces();
             });
         });
     </script>
+    <script>
+    
+$('#userForm').on('submit', function(event) {
+    event.preventDefault(); 
+
+    
+    var formData = {
+        name: $('#name').val(),
+        province: $('#province').val(),
+        district: $('#district').val(),
+        role: $('#role').val()
+    };
+
+    
+    $.ajax({
+        url: '../../action/create-users.php', 
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                alert('User added successfully');
+                
+                
+                $('#userModal').modal('hide');
+
+                
+                $('#userForm')[0].reset();
+
+                
+                location.reload(); 
+            } else {
+                alert(response.message); 
+            }
+        },
+        error: function() {
+            alert('An error occurred while adding the user.');
+        }
+    });
+});
+
+</script>
+
+
+
 
 </body>
 
