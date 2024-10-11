@@ -2,44 +2,61 @@
 include_once(sprintf('%s/config/Connection.php', dirname(__DIR__)));
  
 class User extends Connection {
+
     public function __construct() {
         parent::__construct();
     }
    
     public function checkLogin($email, $password) {
-        $password = md5($password);
+        $sql = "SELECT * FROM users WHERE email = :email";
+        
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
 
-        $sql = "SELECT * FROM users WHERE email = '$email' AND password = '$password'";
-        $query = $this->connection->query($sql);
- 
-        if($query->num_rows > 0) {
-            $row = $query->fetch_array();
-            return $row['id'];
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Check if the user exists and verify the password
+        if ($user && md5($password) === $user['password']) {
+            // If the password is correct, return the user's ID
+            return $user['id'];
         } else {
+            // If login fails, return false
             return false;
         }
     }
+    
        
     public function getAllUsers() {
         $sql = "SELECT * FROM users";
-        $query = $this->connection->query($sql);
-       
-        $row = $query->fetch_all(MYSQLI_ASSOC);
-           
-        return $row;      
+        
+        // Prepare and execute the query
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        
+        // Fetch all the results as an associative array
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $row;
     }
     
-public function addUser($data) {
-    $sql = "INSERT INTO users (name, province_id, district_id, role) VALUES (:name, :province_id, :district_id, :role)";
     
+    public function addUser($data) {
+        $sql = "INSERT INTO users (name, role, email, district_id) 
+                VALUES (:name, :role, :email, :district_id)";
     
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':name', $data['name']);
-    $stmt->bindParam(':province_id', $data['province_id']);
-    $stmt->bindParam(':district_id', $data['district_id']);
-    $stmt->bindParam(':role', $data['role']);
+        // Prepare the SQL statement
+        $stmt = $this->connection->prepare($sql);
     
-    return $stmt->execute();
-}
-
+        // Execute the statement with the provided data (correct array syntax)
+        $result = $stmt->execute(array(
+            ':name'        => $data['name'],
+            ':role'        => $data['role'],
+            ':email'       => $data['email'],
+            ':district_id' => $data['district_id'],
+        ));
+    
+        // Return true if execution is successful, false otherwise
+        return $result;
+    }      
 }

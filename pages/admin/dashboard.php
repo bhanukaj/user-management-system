@@ -110,6 +110,10 @@ $provinces = $province->getAllProvinces();
                             <input type="text" class="form-control" id="name" placeholder="Enter name" required>
                         </div>
                         <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="province" class="form-label">Province</label>
                             <select class="form-select" id="province" required>
                                 <option value="">Select Province</option>
@@ -126,9 +130,9 @@ $provinces = $province->getAllProvinces();
                         </div>
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
-                            <select class="form-select" id="role" required>
+                            <select class="form-select" id="role" required disabled>
                                 <option value="1">Admin</option>
-                                <option value="2">User</option>
+                                <option value="2" selected>User</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -177,53 +181,46 @@ $provinces = $province->getAllProvinces();
                     }
                 });
             });
+
+            $('#userForm').on('submit', function(event) {
+                event.preventDefault(); 
+
+                var formData = {
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    district: $('#district').val(),
+                    role: $('#role').val()
+                };
+
+                $.ajax({
+                    url: '../../action/create-users.php', 
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('User added successfully');
+                            
+                            $('#userModal').modal('hide');
+                            $('#userForm')[0].reset();
+
+                            location.reload(); 
+                        } else {
+                            alert(response.message); 
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while adding the user.');
+                    }
+                });
+            });
         });
     </script>
     <script>
     
-$('#userForm').on('submit', function(event) {
-    event.preventDefault(); 
 
-    
-    var formData = {
-        name: $('#name').val(),
-        province: $('#province').val(),
-        district: $('#district').val(),
-        role: $('#role').val()
-    };
-
-    
-    $.ajax({
-        url: '../../action/create-users.php', 
-        type: 'POST',
-        data: formData,
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                alert('User added successfully');
-                
-                
-                $('#userModal').modal('hide');
-
-                
-                $('#userForm')[0].reset();
-
-                
-                location.reload(); 
-            } else {
-                alert(response.message); 
-            }
-        },
-        error: function() {
-            alert('An error occurred while adding the user.');
-        }
-    });
-});
 
 </script>
-
-
-
 
 </body>
 

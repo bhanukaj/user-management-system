@@ -7,11 +7,11 @@ class District extends Connection {
     }
        
     public function getAllDistrictsByProvinceId($provinceId) {
-        $sql = "SELECT * FROM districts WHERE province_id = '$provinceId'";
-        $query = $this->connection->query($sql);
-       
-        $row = $query->fetch_all(MYSQLI_ASSOC);
-           
-        return $row;
-    }
+        $sql = "SELECT * FROM districts WHERE province_id = :provinceId";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindParam(':provinceId', $provinceId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);;
+    }    
 }

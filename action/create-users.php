@@ -1,6 +1,5 @@
 <?php
 
-
 session_start();
 
 if (isset($_SESSION['user']) === false || (trim($_SESSION['user']) === '')) {
@@ -8,28 +7,25 @@ if (isset($_SESSION['user']) === false || (trim($_SESSION['user']) === '')) {
     exit();
 }
 
-include_once('../../entity/User.php');
+include_once('../entity/User.php');
 
 $user = new User();
 
-
 $name = $_POST['name'] ?? null;
-$provinceId = $_POST['province'] ?? null;
+$email = $_POST['email'] ?? null;
 $districtId = $_POST['district'] ?? null;
 $role = $_POST['role'] ?? null;
 
-
-if (!$name || !$provinceId || !$districtId || !$role) {
+if (!$name || !$email || !$districtId || !$role) {
     echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
     exit();
 }
 
-
 $success = $user->addUser([
     'name' => $name,
-    'province_id' => $provinceId,
+    'role' => $role,
+    'email' => $email,
     'district_id' => $districtId,
-    'role' => $role
 ]);
 
 if ($success) {
