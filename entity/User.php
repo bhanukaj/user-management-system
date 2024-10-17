@@ -25,10 +25,9 @@ class User extends Connection {
             return false;
         }
     }
-    
-       
-    public function getAllUsers() {
-        $sql = "SELECT * FROM users";
+
+    public function getUsers() {
+        $sql = "SELECT id, name, district_id, email, role FROM users";
         
         // Prepare and execute the query
         $stmt = $this->connection->prepare($sql);
@@ -39,16 +38,41 @@ class User extends Connection {
         
         return $row;
     }
-    
-    
-    public function addUser($data) {
+
+    public function getUser($id) {
+        $sql = "SELECT 
+                u.id,
+                u.name,
+                u.email,
+                u.role,
+                u.district_id,
+                d.province_id,
+                p.name AS province_name,
+                d.name AS district_name
+            FROM
+                users u
+                    INNER JOIN districts d ON u.district_id = d.id
+                    INNER JOIN provinces p ON d.province_id = p.id
+            WHERE u.id = :id";
+        
+        // Prepare and execute the query
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $user;
+    }
+
+    public function createUser($data) {
         $sql = "INSERT INTO users (name, role, email, district_id) 
                 VALUES (:name, :role, :email, :district_id)";
     
         // Prepare the SQL statement
         $stmt = $this->connection->prepare($sql);
     
-        // Execute the statement with the provided data (correct array syntax)
+        // Execute the statement with the provided data
         $result = $stmt->execute(array(
             ':name'        => $data['name'],
             ':role'        => $data['role'],
@@ -58,5 +82,32 @@ class User extends Connection {
     
         // Return true if execution is successful, false otherwise
         return $result;
-    }      
+    }
+
+    public function updateUser($data) {
+        $sql = "UPDATE
+                users 
+            SET
+                name = :name, 
+                role = :role, 
+                email = :email, 
+                district_id = :district_id 
+            WHERE 
+                id = :id";
+    
+        // Prepare the SQL statement
+        $stmt = $this->connection->prepare($sql);
+    
+        // Execute the statement with the provided data
+        $result = $stmt->execute(array(
+            ':id'          => $data['id'],
+            ':name'        => $data['name'],
+            ':role'        => $data['role'],
+            ':email'       => $data['email'],
+            ':district_id' => $data['district_id'],
+        ));
+    
+        // Return true if execution is successful, false otherwise
+        return $result;
+    }
 }

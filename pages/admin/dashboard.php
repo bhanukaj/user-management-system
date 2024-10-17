@@ -11,7 +11,7 @@ include_once('../../entity/Province.php');
 $user = new User();
 $province = new Province();
 
-$users = $user->getAllUsers();
+$users = $user->getUsers();
 $provinces = $province->getAllProvinces();
 ?>
 
@@ -54,7 +54,7 @@ $provinces = $province->getAllProvinces();
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>User Management</h2>
             <!-- Add New User Button -->
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">Add New User</button>
+            <button class="btn btn-primary" onclick="openUserModalForCreate()">Add New User</button>
         </div>
 
         <!-- User List Table -->
@@ -84,7 +84,7 @@ $provinces = $province->getAllProvinces();
                                 <td><?php echo htmlspecialchars($user['role']); ?></td>
                                 <td>
                                     <!-- Add action buttons or links here if needed -->
-                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#userModal">Edit</button>
+                                    <button class="btn btn-warning" onclick="openUserModalForUpdate(<?php echo htmlspecialchars($user['id']); ?>)">Edit</button>
                                     <button class="btn btn-danger">Delete</button>
                                 </td>
                             </tr>
@@ -104,7 +104,10 @@ $provinces = $province->getAllProvinces();
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="submitType" value="create">
+
                     <form id="userForm">
+                        <input type="hidden" id="id">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input type="text" class="form-control" id="name" placeholder="Enter name" required>
@@ -135,7 +138,7 @@ $provinces = $province->getAllProvinces();
                                 <option value="2" selected>User</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button onclick="submitUserForm()" class="btn btn-primary">Submit</button>
                     </form>
                 </div>
             </div>
@@ -181,40 +184,122 @@ $provinces = $province->getAllProvinces();
                     }
                 });
             });
-
-            $('#userForm').on('submit', function(event) {
-                event.preventDefault(); 
-
-                var formData = {
-                    name: $('#name').val(),
-                    email: $('#email').val(),
-                    district: $('#district').val(),
-                    role: $('#role').val()
-                };
-
-                $.ajax({
-                    url: '../../action/create-users.php', 
-                    type: 'POST',
-                    data: formData,
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            alert('User added successfully');
-                            
-                            $('#userModal').modal('hide');
-                            $('#userForm')[0].reset();
-
-                            location.reload(); 
-                        } else {
-                            alert(response.message); 
-                        }
-                    },
-                    error: function() {
-                        alert('An error occurred while adding the user.');
-                    }
-                });
-            });
         });
+
+        function openUserModalForCreate() {
+            $('#userForm')[0].reset();
+            $('#submitType').val('create');
+
+            $('#userModal').modal('show');
+        }
+
+        function openUserModalForUpdate(userId) {
+            $.ajax({
+                url: '../../action/get-user.php', 
+                type: 'GET',
+                data: { id: userId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#userForm')[0].reset();
+                        $('#submitType').val('update');
+
+                        var user = response.data;
+
+                        $('#id').val(user.id);
+                        $('#name').val(user.name);
+                        $('#email').val(user.email);
+                        $('#role').val(user.role);
+                        $('#province').val(user.province_id);
+
+                        $('#district').empty();
+                        $('#district').append(
+                            $('<option></option>').val(user.district_id).text(user.district_name)
+                        );
+                        
+                        $('#userModal').modal('show');
+                    } else {
+                        alert(response.message); 
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while adding the user.');
+                }
+            });
+        }
+
+        function submitUserForm() {
+            var submitType = $('#submitType').val();
+
+            if (submitType === 'create') {
+                createUser();
+            } else {
+                updateUser();
+            }
+        }
+
+        function createUser() {
+            var formData = {
+                name: $('#name').val(),
+                email: $('#email').val(),
+                district: $('#district').val(),
+                role: $('#role').val()
+            };
+
+            $.ajax({
+                url: '../../action/create-user.php', 
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('User added successfully');
+                        
+                        $('#userModal').modal('hide');
+                        $('#userForm')[0].reset();
+
+                        location.reload(); 
+                    } else {
+                        alert(response.message); 
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while adding the user.');
+                }
+            });
+        };
+
+        function updateUser() {
+            var formData = {
+                id: $('#id').val(),
+                name: $('#name').val(),
+                email: $('#email').val(),
+                district: $('#district').val(),
+                role: $('#role').val()
+            };
+
+            $.ajax({
+                url: '../../action/update-user.php', 
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('User update successfully');
+                        
+                        $('#userForm')[0].reset();
+                        $('#userModal').modal('hide');
+
+                        location.reload();
+                    } else {
+                        alert(response.message); 
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while updating the user.');
+                }
+            });
+        };
     </script>
     <script>
     
