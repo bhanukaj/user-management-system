@@ -8,10 +8,14 @@ class Province extends Connection {
        
     public function getAllProvinces() {
         $sql = "SELECT * FROM provinces";
-        $query = $this->connection->query($sql);
-       
-        $row = $query->fetch_all(MYSQLI_ASSOC);
-           
-        return $row;      
+        
+        // Prepare and execute the query
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        
+        // Fetch all the results as an associative array
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $row;
     }
 }

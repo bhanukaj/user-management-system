@@ -6,11 +6,8 @@ include_once('../entity/User.php');
  
 $user = new User();
  
-if(isset($_POST['email']) === true) {
-   $email = $user->escapeString($_POST['email']);
-   $password = $user->escapeString($_POST['password']);
-
-   $auth = $user->checkLogin($email, $password);
+if(isset($_POST['email']) === true && isset($_POST['password']) === true) {
+   $auth = $user->checkLogin($_POST['email'], $_POST['password']);
 
    if($auth === false) {
       $_SESSION['message'] = 'Invalid username or password';
