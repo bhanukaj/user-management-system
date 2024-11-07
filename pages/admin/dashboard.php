@@ -68,7 +68,7 @@ $provinces = $province->getAllProvinces();
                         <tr>
                             <th>User ID</th>
                             <th>Name</th>
-                            <th>Province</th>
+                            <th>Email</th>
                             <th>District</th>
                             <th>Role</th>
                             <th>Actions</th>
@@ -85,7 +85,8 @@ $provinces = $province->getAllProvinces();
                                 <td>
                                     <!-- Add action buttons or links here if needed -->
                                     <button class="btn btn-warning" onclick="openUserModalForUpdate(<?php echo htmlspecialchars($user['id']); ?>)">Edit</button>
-                                    <button class="btn btn-danger">Delete</button>
+                                    <button class="btn btn-danger" onclick="confirmDelete(<?php echo htmlspecialchars($user['id']); ?>)">Delete</button>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -300,6 +301,39 @@ $provinces = $province->getAllProvinces();
                 }
             });
         };
+        function confirmDelete(userId) {
+    // Show a confirmation dialog before proceeding
+    if (confirm('Are you sure you want to delete this user?')) {
+        // If confirmed, proceed with the AJAX request to delete the user
+        $.ajax({
+            url: '../../action/delete-user.php',  // Backend script to handle deletion
+            type: 'POST',
+            data: { id: userId },  // Send the user ID to delete
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert(response.message);  // Show success message
+                    
+                    // Optionally, remove the user row from the table
+                    $('#userTableBody').find('tr').filter(function() {
+                        return $(this).find('td:first').text() == userId;
+                    }).remove();
+                } else {
+                    alert(response.message);  // Show error message if deletion fails
+                }
+            },
+            error: function() {
+                alert('An error occurred while trying to delete the user.');
+            }
+        });
+    }
+}
+
+
+       
+      
+
+
     </script>
     <script>
     
