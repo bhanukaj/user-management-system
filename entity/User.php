@@ -25,7 +25,7 @@ class User extends Connection {
             return false;
         }
     }
-
+    
     public function getUsers() {
         $sql = "SELECT id, name, district_id, email, role FROM users";
         
@@ -64,7 +64,6 @@ class User extends Connection {
         
         return $user;
     }
-
     public function createUser($data) {
         $sql = "INSERT INTO users (name, role, email, district_id) 
                 VALUES (:name, :role, :email, :district_id)";
@@ -110,4 +109,17 @@ class User extends Connection {
         // Return true if execution is successful, false otherwise
         return $result;
     }
+    public function deleteUser($id) {
+        try {
+            $stmt = $this->connection->prepare("DELETE FROM users WHERE id = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Log error message (optional)
+            error_log("Failed to delete user: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    
 }
